@@ -23,6 +23,7 @@ REST Client allows you to send HTTP request and view the response in Visual Stud
     - Azure Active Directory
     - Microsoft Identity Platform
     - AWS Signature v4
+    - AWS Cognito
 * Environments and custom/system variables support
     - Use variables in any place of request(_URL_, _Headers_, _Body_)
     - Support __environment__, __file__, __request__ and __prompt__ custom variables
@@ -40,6 +41,7 @@ REST Client allows you to send HTTP request and view the response in Visual Stud
       + `{{$processEnv [%]envVarName}}`
       + `{{$dotenv [%]variableName}}`
       + `{{$aadToken [new] [public|cn|de|us|ppe] [<domain|tenantId>] [aud:<domain|tenantId>]}}`
+      + `{{$oidcAccessToken  [new]  [<clientId:<clientId>] [<callbackPort:<callbackPort>] [authorizeEndpoint:<authorizeEndpoint}] [tokenEndpoint:<tokenEndpoint}] [scopes:<scopes}] [audience:<audience}]}`
     - Easily create/update/delete environments and environment variables in setting file
     - File variables can reference both custom and system variables
     - Support environment switch
@@ -382,6 +384,19 @@ GET https://httpbin.org/aws-auth HTTP/1.1
 Authorization: AWS <accessId> <accessKey> [token:<sessionToken>] [region:<regionName>] [service:<serviceName>]
 ```
 
+### AWS Cognito
+To authenticate via AWS Cognito, you need to set the Authorization header schema to `COGNITO` and provide your AWS credentials separated by spaces:
+- `<Username>`: AWS Username for target user
+- `<Password>`: AWS Password for target user
+- `<Region>`: AWS Region for Cognito pool
+- `<UserPoolId>`: AWS Cognito User Pool ID
+- `<ClientId>`: AWS Cognito Client ID
+
+```http
+GET https://httpbin.org/aws-auth HTTP/1.1
+Authorization: COGNITO <Username> <Password> <Region> <UserPoolId> <ClientId>
+```
+
 ## Generate Code Snippet
 ![Generate Code Snippet](https://raw.githubusercontent.com/Huachao/vscode-restclient/master/images/code-snippet.gif)
 Once you’ve finalized your request in REST Client extension, you might want to make the same request from your source code. We allow you to generate snippets of code in various languages and libraries that will help you achieve this. Once you prepared a request as previously, use shortcut `Ctrl+Alt+C`(`Cmd+Alt+C` for macOS), or right-click in the editor and then select `Generate Code Snippet` in the menu, or press `F1` and then select/type `Rest Client: Generate Code Snippet`, it will pop up the language pick list, as well as library list. After you selected the code snippet language/library you want, the generated code snippet will be previewed in a separate panel of Visual Studio Code, you can click the `Copy Code Snippet` icon in the tab title to copy it to clipboard.
@@ -588,6 +603,22 @@ System variables provide a pre-defined set of variables that can be used in any 
 
   `clientId:<clientid>`: Optional. Identifier of the application registration to use to obtain the token. Default uses an application registration created specifically for this plugin.
 
+* `{{$oidcAccessToken  [new]  [<clientId:<clientId>] [<callbackPort:<callbackPort>] [authorizeEndpoint:<authorizeEndpoint}] [tokenEndpoint:<tokenEndpoint}] [scopes:<scopes}] [audience:<audience}]}`: Add an Oidc Identity Server token based on the following options (must be specified in order):
+
+  `new`: Optional. Specify `new` to force re-authentication and get a new token for the client. Default: Reuse previous token for clientId from an in-memory cache. Expired tokens are refreshed automatically. (Restart Visual Studio Code to clear the cache.)
+
+  `clientId:<clientid>`: Optional. Identifier of the application registration to use to obtain the token.
+
+  `callbackPort:<callbackPort>`: Optional. Port to use for the local callback server. Default: 7777 (random port).
+
+  `authorizeEndpoint:<authorizeEndpoint>`: The authorization endpoint to use. 
+
+  `tokenEndpoint:<tokenEndpoint>`: The token endpoint to use. 
+
+  `scopes:<scope[,]>`: Optional. Comma delimited list of scopes that must have consent to allow the call to be successful. 
+
+  `audience:<audience>`: Optional.
+   
 * `{{$guid}}`: Add a RFC 4122 v4 UUID
 * `{{$processEnv [%]envVarName}}`: Allows the resolution of a local machine environment variable to a string value. A typical use case is for secret keys that you don't want to commit to source control.
 For example: Define a shell environment variable in `.bashrc` or similar on windows
